@@ -13,9 +13,9 @@ renderer.shadowMapEnabled = true;
 renderer.shadowMapType = THREE.PCFSoftShadowMap;
 
 // SETUP CAMERA
-var camera = new THREE.PerspectiveCamera(120, 1, 0.1, 1000); // view angle, aspect ratio, near, far
+var camera = new THREE.PerspectiveCamera(120, 1, 0.1, 3000); // view angle, aspect ratio, near, far
 // camera.position.set(30, 75, 60);
-camera.position.set(0, 150, 200);
+camera.position.set(300, 100, 200);
 camera.lookAt(scene.position);
 scene.add(camera);
 
@@ -58,6 +58,9 @@ var cube6 = new THREE.ImageUtils.loadTexture(imgPrefix + 'cube6.png');
 var objPrefix = 'images/Textures/';
 var dog2Img = new THREE.ImageUtils.loadTexture(objPrefix + 'coolDog2.jpg');
 
+groundImg.wrapT = groundImg.wrapS = THREE.RepeatWrapping;
+groundImg.repeat.set(4,4);
+
 // Objects Addition:
 var mirBall = new THREE.CubeCamera(0.1, 5000, 30);
 
@@ -79,11 +82,12 @@ scene.add(ballMesh);
 var ambientLight = new THREE.AmbientLight(0x444444);
 scene.add(ambientLight);
 
-var sunLight = new THREE.PointLight(0x000066, 1, 100);
-sunLight.position.set(1, 500, 0);
+var sunLight = new THREE.PointLight(0xffffff);
+sunLight.position.set(1, 1000, 0);
+sunLight.castShadow = true;
 scene.add(sunLight);
 
-var spotLight = new THREE.SpotLight(0xffff00);
+var spotLight = new THREE.SpotLight(0x000080);
 spotLight.angle = Math.PI /2;
 spotLight.target.position.set(0,2,0);
 spotLight.intensity = 1;
@@ -95,10 +99,10 @@ spotLight.shadowDarkness = 0.5;
 scene.add(spotLight);
 spotLight.parent = worldFrame;
 
-var spotLight2 = new THREE.SpotLight(0xff0000);
+var spotLight2 = new THREE.SpotLight(0xFFD700);
 spotLight2.target.position.set(0,2,0);
-spotLight2.intensity = 1;
-spotLight2.position.set(15,200,-15);
+spotLight2.intensity = 0.5;
+spotLight2.position.set(15,200,300);
 spotLight2.shadowCameraNear = 0.01;
 spotLight2.castShadow = true;
 spotLight2.shadowDarkness = 0.5;
@@ -109,8 +113,25 @@ spotLight2.shadowMapHeight = 1024;
 spotLight2.shadowCameraNear = 500;
 spotLight2.shadowCameraFar = 4000;
 spotLight2.shadowCameraFov = 30;
-
 scene.add(spotLight2);
+spotLight.parent = worldFrame;
+
+// Light for armadillo
+var spotLight3 = new THREE.SpotLight(0xff0000);
+spotLight3.target.position.set(0, -100, 300);
+spotLight3.intensity = 1;
+spotLight3.position.set(30, 200, -300);
+spotLight3.shadowCameraNear = 0.01;
+spotLight3.castShadow = true;
+spotLight3.shadowDarkness = 0.5;
+//spotLight3.shadowCameraVisible = true;
+// Edit shadow
+spotLight3.shadowMapWidth = 1024;
+spotLight3.shadowMapHeight = 1024;
+spotLight3.shadowCameraNear = 500;
+spotLight3.shadowCameraFar = 4000;
+spotLight3.shadowCameraFov = 30;
+scene.add(spotLight3);
 spotLight.parent = worldFrame;
 
 // FLOOR WITH CHECKERBOARD 
@@ -137,17 +158,17 @@ floor.parent = worldFrame;
 // Surrounding:
 var envPrefix = 'images/background/';
 var surrounding = [];
-surrounding.push(new THREE.MeshBasicMaterial({ map: cube1}));
-surrounding.push(new THREE.MeshBasicMaterial({ map: cube2}));
-surrounding.push(new THREE.MeshBasicMaterial({ map: cube3}));
-surrounding.push(new THREE.MeshBasicMaterial({ map: cube4}));
-surrounding.push(new THREE.MeshBasicMaterial({ map: cube5}));
-surrounding.push(new THREE.MeshBasicMaterial({ map: cube6}));
+surrounding.push(new THREE.MeshPhongMaterial({ map: cube1}));
+surrounding.push(new THREE.MeshPhongMaterial({ map: cube2}));
+surrounding.push(new THREE.MeshPhongMaterial({ map: cube3}));
+surrounding.push(new THREE.MeshPhongMaterial({ map: cube4}));
+surrounding.push(new THREE.MeshPhongMaterial({ map: cube5}));
+surrounding.push(new THREE.MeshPhongMaterial({ map: cube6}));
 for (var i = 0; i < 6; i++) {
     surrounding[i].side = THREE.BackSide;
 }
 var surMat = new THREE.MeshFaceMaterial(surrounding);
-var surGeo = new THREE.BoxGeometry (600, 600, 600);
+var surGeo = new THREE.BoxGeometry (3000, 3000, 3000);
 var surMesh = new THREE.Mesh( surGeo, surMat);
 surMesh.parent = worldFrame;
 surMesh.castShadow = false;
@@ -155,8 +176,6 @@ surMesh.receiveShadow = true;
 //surMesh.position.y = -0.1;
 // surMesh.rotation.x = Math.PI / 2;
 scene.add(surMesh);
-
-
 
 // Loading Custom Object:
 function loadOBJ(file, material, scale, xOff, yOff, zOff, xRot, yRot, zRot) {
@@ -191,12 +210,13 @@ function loadOBJ(file, material, scale, xOff, yOff, zOff, xRot, yRot, zRot) {
     }, onProgress, onError);
 }
 
-var dogMat = new THREE.MeshPhongMaterial({
-	// ambient: 0x444444,
-	shininess: 400,
+var aMat = new THREE.MeshPhongMaterial({
+	ambient: 0x444444,
+	shininess: 600,
 	map: dog2Img,
 	shading: THREE.SmoothShading,
-	color: 0x404040
+	color: 0x00FF00,
+    map: groundImg
 });
 
 var dog2Mat = new THREE.MeshPhongMaterial({
@@ -207,6 +227,7 @@ var dog2Mat = new THREE.MeshPhongMaterial({
 });
 
 loadOBJ('images/Characters/myDog.obj', dog2Mat, 2, 0, 0, 0, 0, 0, 0);
+loadOBJ('images/Characters/armadillo.obj', aMat, 100, 0, -100, 300, 0, 0, 0);
 
 
 // HELPER FUNCTIONS:
@@ -229,17 +250,19 @@ function checkKeyboard() {
   } else if (keyboard.pressed("A")) {
     ballMesh.position.z += 0.7;
   } else if (keyboard.pressed("D")) {
-    ballMesh.position.z -= 0.7;
-  }
+    ballMesh.position.z -= 0.7; 
+   } else if (keyboard.pressed("Q")) {
+     ballMesh.position.y += 0.7;
+   } else if (keyboard.pressed("E")) {
+     ballMesh.position.y -= 0.7;
+   }
 
   ballMat.needsUpdate = true;
   spotLight2.needsUpdate = true;
 }
 
-
 // SETUP UPDATE CALL-BACK
 function update() {
-	lightUP();
     checkKeyboard();
     renderBall();
     requestAnimationFrame(update);
