@@ -206,7 +206,7 @@ var dog2Mat = new THREE.MeshPhongMaterial({
     map: dog2Img
 });
 
-loadOBJ('images/Characters/coolDog2.obj', dog2Mat, 2, 0, 0, 0, 0, 0, 0);
+loadOBJ('images/Characters/myDog.obj', dog2Mat, 2, 0, 0, 0, 0, 0, 0);
 
 
 // HELPER FUNCTIONS:
