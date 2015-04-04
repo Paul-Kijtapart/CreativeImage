@@ -7,7 +7,7 @@ var scene = new THREE.Scene();
 
 // SETUP RENDERER
 var renderer = new THREE.WebGLRenderer();
-//renderer.setClearColor(0x0099CC); // white background colour
+renderer.setClearColor(0x0099CC); // white background colour
 document.body.appendChild(renderer.domElement);
 
 // SETUP CAMERA
@@ -51,18 +51,32 @@ scene.add(floor);
 floor.parent = worldFrame;
 
 
-// Geometry
-var pGeom = new THREE.SphereGeometry(3,32,32);
-var pMPos = new THREE.Vector3(0,2.5,0); //Mesh position in world
-var pPPos = new THREE.Vector3(2.5,2.5,10); //Projector position in world
-var pMat = new THREE.MeshPhongMaterial({
+// Objects Addition:
+var ballGeom = new THREE.SphereGeometry(3,32,32);
+var ballMPos = new THREE.Vector3(0,2.5,0); //Mesh position in world
+var ballPPos = new THREE.Vector3(2.5,2.5,10); //Projector position in world
+var ballMat = new THREE.MeshPhongMaterial({
 	color: 0xffffff
 });
 
-var pMesh = new THREE.Mesh(pGeom, pMat);
-pMesh.position.set(0,10,0);
-pMesh.parent = worldFrame;
-scene.add(pMesh);
+var ballMesh = new THREE.Mesh(ballGeom, ballMat);
+ballMesh.position.set(0,10,0);
+ballMesh.parent = worldFrame;
+scene.add(ballMesh);
+
+
+var jsonLoader = new THREE.JSONLoader();
+jsonLoader.load('js/coolDog.js', createScene);
+
+function createScene( geometry) {
+	var dMat = new THREE.MeshPhongMaterial({
+		color: 0xffffff
+	});
+	var dMesh = new THREE.Mesh(geometry, dMat);
+	dMesh.position.set(100,0,0);
+	dMesh.parent = worldFrame;
+	scene.add(dMesh);
+}
 
 
 // Light UP
