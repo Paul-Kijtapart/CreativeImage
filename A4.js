@@ -12,8 +12,8 @@ document.body.appendChild(renderer.domElement);
 
 // SETUP CAMERA
 var camera = new THREE.PerspectiveCamera(80, 1, 0.1, 1000); // view angle, aspect ratio, near, far
-camera.position.set(10,15,40);
-camera.lookAt(scene.position); 
+camera.position.set(10, 15, 40);
+camera.lookAt(scene.position);
 scene.add(camera);
 
 // SETUP ORBIT CONTROL OF THE CAMERA
@@ -22,27 +22,30 @@ controls.damping = 0.2;
 
 // ADAPT TO WINDOW RESIZE
 function resize() {
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resize);
 resize();
 
 // WORLD COORDINATE FRAME: other objects are defined with respect to it
-var worldFrame = new THREE.AxisHelper(5) ;
+var worldFrame = new THREE.AxisHelper(5);
 scene.add(worldFrame);
 
 // Image Loading:
 var imgPrefix = 'images/background/';
 var skyImg = new THREE.ImageUtils.loadTexture(imgPrefix + 'sky.png');
-var groundImg = new THREE.ImageUtils.loadTexture( imgPrefix + 'ground.png');
+var groundImg = new THREE.ImageUtils.loadTexture(imgPrefix + 'ground.png');
 
 // FLOOR WITH CHECKERBOARD 
 var floorTexture = groundImg;
 floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
 floorTexture.repeat.set(4, 4);
-var floorMaterial = new THREE.MeshPhongMaterial({ map: floorTexture, side: THREE.DoubleSide });
+var floorMaterial = new THREE.MeshPhongMaterial({
+    map: floorTexture,
+    side: THREE.DoubleSide
+});
 var floorGeometry = new THREE.PlaneBufferGeometry(70, 50);
 var floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.position.y = -0.1;
@@ -52,63 +55,87 @@ floor.parent = worldFrame;
 
 
 // Objects Addition:
-var ballGeom = new THREE.SphereGeometry(3,32,32);
-var ballMPos = new THREE.Vector3(0,2.5,0); //Mesh position in world
-var ballPPos = new THREE.Vector3(2.5,2.5,10); //Projector position in world
+var ballGeom = new THREE.SphereGeometry(3, 32, 32);
+var ballMPos = new THREE.Vector3(0, 2.5, 0); //Mesh position in world
+var ballPPos = new THREE.Vector3(2.5, 2.5, 10); //Projector position in world
 var ballMat = new THREE.MeshPhongMaterial({
-	color: 0xffffff
+    color: 0xffffff
 });
 
 var ballMesh = new THREE.Mesh(ballGeom, ballMat);
-ballMesh.position.set(0,10,0);
+ballMesh.position.set(0, 10, 0);
 ballMesh.parent = worldFrame;
 scene.add(ballMesh);
 
+// Loading Custom Object:
+function loadOBJ(file, material, scale, xOff, yOff, zOff, xRot, yRot, zRot) {
+    var onProgress = function(query) {
+        if (query.lengthComputable) {
+            var percentComplete = query.loaded / query.total * 100;
+            console.log(Math.round(percentComplete, 2) + '% downloaded');
+        }
+    };
+    
+    var onError = function() {
+        console.log('Failed to load ' + file);
+    };
 
-var jsonLoader = new THREE.JSONLoader();
-jsonLoader.load('js/coolDog.js', createScene);
+    var loader = new THREE.OBJLoader()
+    loader.load(file, function(object) {
+        object.traverse(function(child) {
+            if (child instanceof THREE.Mesh) {
+                child.material = material;
+            }
+        });
 
-function createScene( geometry) {
-	var dMat = new THREE.MeshPhongMaterial({
-		color: 0xffffff
-	});
-	var dMesh = new THREE.Mesh(geometry, dMat);
-	dMesh.position.set(100,0,0);
-	dMesh.parent = worldFrame;
-	scene.add(dMesh);
+        object.position.set(xOff, yOff, zOff);
+        object.rotation.x = xRot;
+        object.rotation.y = yRot;
+        object.rotation.z = zRot;
+        object.scale.set(scale, scale, scale);
+        object.parent = floor;
+        scene.add(object);
+
+    }, onProgress, onError);
 }
+
+var dogMat = new THREE.MeshPhongMaterial({
+	color: 0x404040
+});
+
+loadOBJ('images/Characters/coolDog.obj', dogMat, 0.4, 0, 0, 0, 0, -Math.PI, 0);
 
 
 // Light UP
-var ambientLight = new THREE.AmbientLight( 0x404040 );
-scene.add( ambientLight );
+var ambientLight = new THREE.AmbientLight(0x404040);
+scene.add(ambientLight);
 
-var sunLight = new THREE.PointLight( 0xFFFF66, 0.7, 100 );
-sunLight.position.set( 1, 50, 0 );
-scene.add( sunLight );
+var sunLight = new THREE.PointLight(0xFFFF66, 0.7, 100);
+sunLight.position.set(1, 50, 0);
+scene.add(sunLight);
 
-var spotLight = new THREE.SpotLight( 0xffffff );
+var spotLight = new THREE.SpotLight(0xffffff);
 spotLight.intensity = 0.2;
-spotLight.position.set( 0, 20, 4 );
+spotLight.position.set(0, 20, 4);
 spotLight.castShadow = true;
 spotLight.shadowMapWidth = 1024;
 spotLight.shadowMapHeight = 1024;
 spotLight.shadowCameraNear = 500;
 spotLight.shadowCameraFar = 4000;
 spotLight.shadowCameraFov = 30;
-scene.add( spotLight );
+scene.add(spotLight);
 
 
 // HELPER FUNCTIONS:
 function lightUP() {
-	
+
 }
 
 // SETUP UPDATE CALL-BACK
 function update() {
-	
-	requestAnimationFrame(update);
-	renderer.render(scene, camera);
+
+    requestAnimationFrame(update);
+    renderer.render(scene, camera);
 }
 
 update();
