@@ -223,13 +223,13 @@ function renderBall() {
 var keyboard = new THREEx.KeyboardState();
 function checkKeyboard() {
     if (keyboard.pressed("W")) {
-        ballMesh.position.x += 0.3;
+        ballMesh.position.x += 0.7;
   } else if (keyboard.pressed("S")) {
-    ballMesh.position.x -= 0.3;
+    ballMesh.position.x -= 0.7;
   } else if (keyboard.pressed("A")) {
-    ballMesh.position.z += 0.3;
+    ballMesh.position.z += 0.7;
   } else if (keyboard.pressed("D")) {
-    ballMesh.position.z -= 0.3;
+    ballMesh.position.z -= 0.7;
   }
 
   ballMat.needsUpdate = true;
